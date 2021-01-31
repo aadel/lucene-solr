@@ -18,6 +18,7 @@ package org.apache.solr.handler.sql;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -140,6 +141,9 @@ class SolrSchema extends AbstractSchema implements Closeable {
         case "pfloat":
         case "pdouble":
           type = typeFactory.createJavaType(Double.class);
+          break;
+        case "pdate":
+          type = typeFactory.createJavaType(Timestamp.class);
           break;
         default:
           type = typeFactory.createJavaType(String.class);

@@ -24,6 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -87,7 +92,31 @@ class SolrEnumerator implements Enumerator<Object> {
       if(val instanceof Double) {
         return this.getRealVal(val);
       }
-      return val;
+      if (val instanceof String) {
+        // Could be an ISO-8601
+        try {
+          Timestamp t;
+          TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse((String) val);
+          Instant i = Instant.from(ta);
+          t = Timestamp.from(i);
+          return t.getTime();
+        } catch (DateTimeParseException e) {
+          return val;
+        }
+      }
+    }
+
+    if (clazz.equals(Timestamp.class)) {
+      // Should be an ISO-8601 timestamp
+      Timestamp t;
+      if (val instanceof String) {
+        TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse((String) val);
+        Instant i = Instant.from(ta);
+        t = Timestamp.from(i);
+      } else {
+        return val;
+      }
+      return t;
     }
 
     if(val instanceof ArrayList) {
